@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/api", require("./routes/subscriber.route"));
+app.use("/appointment", require("./routes/appointment.route"));
 
 // Start server
 app.listen(process.env.PORT, async () => {
