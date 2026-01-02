@@ -4,6 +4,8 @@ const router = express.Router();
 const {
   createAppointment,
   getAllAppointments,
+  updateAppointmentStatus,
+  deleteAppointment,
 } = require("../controllers/appointment.controller");
 const multer = require("multer");
 const storage = require("../config/storage");
@@ -23,5 +25,8 @@ router.post(
 
 // GET: fetch all appointments (admin)
 router.get("/", getAllAppointments);
+
+router.put("/:id/mark", updateAppointmentStatus);
+router.delete("/:id", deleteAppointment);
 
 module.exports = router;

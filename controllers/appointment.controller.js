@@ -75,3 +75,61 @@ exports.getAllAppointments = async (req, res) => {
     });
   }
 };
+
+exports.updateAppointmentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { marked } = req.body;
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      id,
+      { marked },
+      { new: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Query not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Query updated successfully",
+      data: appointment,
+    });
+  } catch (error) {
+    console.error("Update Appointment Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update appointment",
+    });
+  }
+};
+
+exports.deleteAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const appointment = await Appointment.findByIdAndDelete(id);
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Appointment deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete Appointment Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete appointment",
+    });
+  }
+};
