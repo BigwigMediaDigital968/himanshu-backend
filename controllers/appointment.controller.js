@@ -8,13 +8,30 @@ exports.createAppointment = async (req, res) => {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
-    let reportData = null;
+    let images = [];
+    let report = null;
 
-    if (req.file) {
-      reportData = {
-        url: req.file.path, // ✅ Cloudinary URL
-        public_id: req.file.public_id, // ✅ Correct public_id
+    // 🖼️ Multiple images
+    if (req.files?.images) {
+      images = req.files.images.map((file) => ({
+        url: file.path,
+        public_id: file.public_id,
+      }));
+    }
+
+    // 📄 Single PDF
+    if (req.files?.report) {
+      report = {
+        url: req.files.report[0].path,
+        public_id: req.files.report[0].public_id,
       };
+    }
+
+    // ❌ Prevent both at once
+    if (images.length > 0 && report) {
+      return res.status(400).json({
+        message: "Upload either images OR a PDF, not both",
+      });
     }
 
     const appointment = await Appointment.create({
@@ -23,7 +40,8 @@ exports.createAppointment = async (req, res) => {
       email,
       disease,
       message,
-      report: reportData,
+      images, // optional
+      report, // optional
     });
 
     res.status(201).json({

@@ -29,8 +29,20 @@ const appointmentSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // 🖼️ Multiple images (optional)
+    images: [
+      {
+        url: {
+          type: String,
+        },
+      },
+    ],
+
+    // 📄 Single PDF (optional)
     report: {
-      url: String,
+      url: {
+        type: String,
+      },
     },
   },
   { timestamps: true }

@@ -5,12 +5,6 @@ const cloudinary = require("./cloudinary");
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    const baseName = file.originalname
-      .split(".")
-      .slice(0, -1)
-      .join("-")
-      .toLowerCase();
-
     // 📄 PDF
     if (file.mimetype === "application/pdf") {
       return {

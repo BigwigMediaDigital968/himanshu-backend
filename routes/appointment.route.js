@@ -3,11 +3,19 @@ const router = express.Router();
 
 const { createAppointment } = require("../controllers/appointment.controller");
 const multer = require("multer");
-const storage = require("../config/storage"); // Cloudinary storage
+const storage = require("../config/storage");
 
+// Multer instance
 const upload = multer({ storage });
 
-// single PDF upload
-router.post("/", upload.single("report"), createAppointment);
+// 👇 allow either images[] OR report (pdf)
+router.post(
+  "/",
+  upload.fields([
+    { name: "images", maxCount: 5 }, // multiple images
+    { name: "report", maxCount: 1 }, // single pdf
+  ]),
+  createAppointment
+);
 
 module.exports = router;
