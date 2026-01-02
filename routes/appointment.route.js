@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-const { createAppointment } = require("../controllers/appointment.controller");
+const {
+  createAppointment,
+  getAllAppointments,
+} = require("../controllers/appointment.controller");
 const multer = require("multer");
 const storage = require("../config/storage");
 
@@ -17,5 +20,8 @@ router.post(
   ]),
   createAppointment
 );
+
+// GET: fetch all appointments (admin)
+router.get("/", getAllAppointments);
 
 module.exports = router;

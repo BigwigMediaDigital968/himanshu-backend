@@ -57,3 +57,21 @@ exports.createAppointment = async (req, res) => {
     });
   }
 };
+
+exports.getAllAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find().sort({ createdAt: -1 }); // latest first
+
+    res.status(200).json({
+      success: true,
+      count: appointments.length,
+      data: appointments,
+    });
+  } catch (error) {
+    console.error("Get Appointments Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch appointments",
+    });
+  }
+};
