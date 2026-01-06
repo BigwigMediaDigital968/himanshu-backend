@@ -12,6 +12,7 @@ app.use(cors());
 app.use("/api", require("./routes/subscriber.route"));
 app.use("/appointment", require("./routes/appointment.route"));
 app.use("/info", require("./routes/info.route"));
+app.use("/blog", require("./routes/blog.route"));
 
 // Start server
 app.listen(process.env.PORT, async () => {
