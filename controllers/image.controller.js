@@ -8,9 +8,25 @@ exports.uploadImages = async (req, res) => {
       return res.status(400).json({ message: "No images uploaded" });
     }
 
+    const { category } = req.body;
+
+    if (!category) {
+      return res.status(400).json({ message: "Category is required" });
+    }
+
+    // Validate category
+    const validCategories = ["DR. Himanshu", "AVF care", "Podcast"];
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({
+        message:
+          "Invalid category. Must be one of: DR. Himanshu, AVF care, Podcast",
+      });
+    }
+
     const images = req.files.map((file) => ({
       url: file.path, // Cloudinary secure URL
       publicId: file.filename, // Cloudinary public_id
+      category: category,
     }));
 
     const savedImages = await Image.insertMany(images);
@@ -27,7 +43,15 @@ exports.uploadImages = async (req, res) => {
 /* ---------------- GET IMAGES (DISPLAY PAGE) ---------------- */
 exports.getImages = async (req, res) => {
   try {
-    const images = await Image.find().sort({ createdAt: -1 });
+    const { category } = req.query;
+
+    // Build query object
+    const query = {};
+    if (category) {
+      query.category = category;
+    }
+
+    const images = await Image.find(query).sort({ createdAt: -1 });
     res.status(200).json(images);
   } catch (error) {
     res.status(500).json({ error: error.message });

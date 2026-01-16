@@ -10,6 +10,11 @@ const imageSchema = new mongoose.Schema(
       type: String,
       //   required: true,
     },
+    category: {
+      type: String,
+      required: true,
+      enum: ["DR. Himanshu", "AVF care", "Podcast"],
+    },
   },
   { timestamps: true }
 );
