@@ -14,6 +14,7 @@ app.use("/appointment", require("./routes/appointment.route"));
 app.use("/info", require("./routes/info.route"));
 app.use("/blog", require("./routes/blog.route"));
 app.use("/gallery", require("./routes/image.route"));
+app.use("/featured", require("./routes/featured.route"));
 
 // Start server
 app.listen(process.env.PORT, async () => {
