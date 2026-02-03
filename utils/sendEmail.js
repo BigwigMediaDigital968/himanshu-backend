@@ -12,7 +12,7 @@ const sendEmail = async ({ to, subject, html }) => {
     const sendSmtpEmail = {
       sender: {
         name: "Himanshu Verma",
-        email: "chandan@bigwigmediadigital.com",
+        email: "varenyamvascular@gmail.com",
       },
       to: [{ email: to }],
       subject,
