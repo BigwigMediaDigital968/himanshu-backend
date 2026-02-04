@@ -12,6 +12,6 @@ router.post("/subscribe", subscribe);
 // Get all subscribers (admin/testing)
 router.get("/subscribers", getSubscribers);
 
-router.delete("/subscribe", unsubscribe);
+router.delete("/subscribe/:email", unsubscribe);
 
 module.exports = router;

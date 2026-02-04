@@ -93,7 +93,7 @@ exports.getSubscribers = async (req, res) => {
 
 // DELETE /api/subscribe
 exports.unsubscribe = async (req, res) => {
-  const { email } = req.params;
+  const email = req.params.email; // 🔥 IMPORTANT
 
   if (!email) {
     return res.status(400).json({ error: "Email is required" });
