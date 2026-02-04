@@ -90,3 +90,28 @@ exports.getSubscribers = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 };
+
+// DELETE /api/subscribe
+exports.unsubscribe = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  try {
+    const deleted = await Subscriber.findOneAndDelete({ email });
+
+    if (!deleted) {
+      return res.status(404).json({ error: "Email not found" });
+    }
+
+    return res.json({
+      success: true,
+      message: "Unsubscribed successfully",
+    });
+  } catch (error) {
+    console.error("Unsubscribe Error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
