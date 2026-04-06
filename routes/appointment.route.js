@@ -23,7 +23,7 @@ router.post(
     { name: "images", maxCount: 5 }, // multiple images
     { name: "report", maxCount: 1 }, // single pdf
   ]),
-  createAppointment
+  createAppointment,
 );
 
 const otpMap = new Map();
@@ -33,21 +33,118 @@ const otpMap = new Map();
  * SEND OTP
  * ==========================
  */
+// router.post(
+//   "/send-otp",
+//   upload.fields([
+//     { name: "images", maxCount: 5 }, // multiple images
+//     { name: "report", maxCount: 1 }, // single pdf
+//   ]),
+//   async (req, res) => {
+//     const { name, email, phone, disease, message } = req.body;
+
+//     try {
+//       if (!email || !name || !phone || !disease) {
+//         return res.status(400).json({ message: "Missing required fields" });
+//       }
+
+//       // 1️⃣ Check if appointment already exists
+//       const existingAppointment = await Appointment.findOne({ email });
+//       if (existingAppointment) {
+//         return res.status(400).json({
+//           message: "Appointment already exists with this email.",
+//         });
+//       }
+
+//       let images = [];
+//       let report = null;
+
+//       // 🖼️ Multiple images
+//       if (req.files?.images) {
+//         images = req.files.images.map((file) => ({
+//           url: file.path,
+//           public_id: file.public_id,
+//         }));
+//       }
+
+//       // 📄 Single PDF
+//       if (req.files?.report) {
+//         report = {
+//           url: req.files.report[0].path,
+//           public_id: req.files.report[0].public_id,
+//         };
+//       }
+
+//       // ❌ Prevent both at once
+//       if (images.length > 0 && report) {
+//         return res.status(400).json({
+//           message: "Upload either images OR a PDF, not both",
+//         });
+//       }
+
+//       // 2️⃣ Generate OTP
+//       const otp = Math.floor(100000 + Math.random() * 900000);
+
+//       // 3️⃣ Store OTP + form data + files temporarily
+//       otpMap.set(email, {
+//         otp,
+//         createdAt: Date.now(),
+//         data: {
+//           name,
+//           email,
+//           phone,
+//           disease,
+//           message,
+//           images,
+//           report,
+//         },
+//       });
+
+//       // 4️⃣ Send OTP email
+//       await sendEmail({
+//         to: email,
+//         subject: "🔐 Your OTP for Appointment Verification",
+//         html: `
+//         <div style="font-family: Arial; padding: 20px;">
+//           <h2>Hello ${name},</h2>
+//           <p>Your OTP for appointment verification is:</p>
+//           <h1 style="letter-spacing: 4px; color: #2563eb;">
+//             ${otp}
+//           </h1>
+//           <p>This OTP is valid for <strong>10 minutes</strong>.</p>
+//           <p>Please do not share this OTP with anyone.</p>
+//           <br />
+//           <p>Regards,<br/><strong>AVF Team</strong></p>
+//         </div>
+//       `,
+//       });
+
+//       res.status(200).json({ message: "OTP sent to email." });
+//     } catch (err) {
+//       console.error("Send OTP Error:", err);
+//       res.status(500).json({ message: "Error sending OTP." });
+//     }
+//   },
+// );
+
+// Without OTP
 router.post(
-  "/send-otp",
+  "/",
   upload.fields([
-    { name: "images", maxCount: 5 }, // multiple images
-    { name: "report", maxCount: 1 }, // single pdf
+    { name: "images", maxCount: 5 },
+    { name: "report", maxCount: 1 },
   ]),
   async (req, res) => {
     const { name, email, phone, disease, message } = req.body;
 
     try {
-      if (!email || !name || !phone || !disease) {
-        return res.status(400).json({ message: "Missing required fields" });
+      // ✅ Validation
+      if (!name || !email || !phone || !disease) {
+        return res.status(400).json({
+          message: "Missing required fields",
+        });
       }
 
-      // 1️⃣ Check if appointment already exists
+      // ❌ Prevent duplicate appointment (optional)
       const existingAppointment = await Appointment.findOne({ email });
       if (existingAppointment) {
         return res.status(400).json({
@@ -58,7 +155,7 @@ router.post(
       let images = [];
       let report = null;
 
-      // 🖼️ Multiple images
+      // 🖼️ Handle multiple images
       if (req.files?.images) {
         images = req.files.images.map((file) => ({
           url: file.path,
@@ -66,7 +163,7 @@ router.post(
         }));
       }
 
-      // 📄 Single PDF
+      // 📄 Handle PDF
       if (req.files?.report) {
         report = {
           url: req.files.report[0].path,
@@ -74,56 +171,79 @@ router.post(
         };
       }
 
-      // ❌ Prevent both at once
+      // ❌ Prevent both uploads
       if (images.length > 0 && report) {
         return res.status(400).json({
           message: "Upload either images OR a PDF, not both",
         });
       }
 
-      // 2️⃣ Generate OTP
-      const otp = Math.floor(100000 + Math.random() * 900000);
-
-      // 3️⃣ Store OTP + form data + files temporarily
-      otpMap.set(email, {
-        otp,
-        createdAt: Date.now(),
-        data: {
-          name,
-          email,
-          phone,
-          disease,
-          message,
-          images,
-          report,
-        },
+      // ✅ Create appointment
+      const appointment = new Appointment({
+        name,
+        email,
+        phone,
+        disease,
+        message,
+        images,
+        report,
+        marked: false,
       });
 
-      // 4️⃣ Send OTP email
+      await appointment.save();
+
+      /**
+       * ==========================
+       * EMAILS
+       * ==========================
+       */
+
+      // 📩 User confirmation email
       await sendEmail({
         to: email,
-        subject: "🔐 Your OTP for Appointment Verification",
+        subject: "✅ Appointment Request Received",
         html: `
-        <div style="font-family: Arial; padding: 20px;">
-          <h2>Hello ${name},</h2>
-          <p>Your OTP for appointment verification is:</p>
-          <h1 style="letter-spacing: 4px; color: #2563eb;">
-            ${otp}
-          </h1>
-          <p>This OTP is valid for <strong>10 minutes</strong>.</p>
-          <p>Please do not share this OTP with anyone.</p>
-          <br />
-          <p>Regards,<br/><strong>AVF Team</strong></p>
-        </div>
-      `,
+          <div style="font-family: Arial; padding: 20px;">
+            <h2>Hello ${name},</h2>
+            <p>
+              Your appointment request has been received successfully.
+              Our team will contact you shortly.
+            </p>
+
+            <p><strong>Disease:</strong> ${disease}</p>
+
+            <br/>
+            <p>Regards,<br/><strong>AVF Team</strong></p>
+          </div>
+        `,
       });
 
-      res.status(200).json({ message: "OTP sent to email." });
+      // 📩 Admin notification email
+      await sendEmail({
+        to: process.env.ADMIN_EMAIL,
+        subject: "📩 New Appointment Received",
+        html: `
+          <h3>New Appointment Details</h3>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone:</strong> ${phone}</p>
+          <p><strong>Disease:</strong> ${disease}</p>
+          <p><strong>Message:</strong> ${message || "-"}</p>
+        `,
+      });
+
+      // ✅ Final response
+      res.status(201).json({
+        message: "Appointment created successfully",
+        appointment,
+      });
     } catch (err) {
-      console.error("Send OTP Error:", err);
-      res.status(500).json({ message: "Error sending OTP." });
+      console.error("Create Appointment Error:", err);
+      res.status(500).json({
+        message: "Failed to create appointment",
+      });
     }
-  }
+  },
 );
 
 /**
