@@ -44,6 +44,16 @@ const blogPostSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  faqs: [
+    {
+      question: { type: String, default: "" },
+      answer: { type: String, default: "" },
+    },
+  ],
+  faqSchema: {
+    type: String,
+  },
 });
 
 const BlogPost = mongoose.model("BlogPost", blogPostSchema);

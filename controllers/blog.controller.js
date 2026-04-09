@@ -5,6 +5,7 @@ exports.addBlog = async (req, res) => {
   try {
     const { title, slug, excerpt, content, author, tags, schemaMarkup } =
       req.body;
+    const faqs = JSON.parse(req.body.faqs || "[]");
 
     if (!req.file || (!req.file.path && !req.file.secure_url)) {
       return res.status(400).json({ error: "Cover image is required." });
@@ -23,6 +24,27 @@ exports.addBlog = async (req, res) => {
       schemaArray = Array.isArray(schemaMarkup) ? schemaMarkup : [schemaMarkup];
     }
 
+    let faqSchema = "";
+
+    if (faqs && faqs.length > 0) {
+      const schema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs
+          .filter((faq) => faq.question && faq.answer)
+          .map((faq) => ({
+            "@type": "Question",
+            name: faq.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: faq.answer,
+            },
+          })),
+      };
+
+      faqSchema = JSON.stringify(schema);
+    }
+
     const blogPost = new BlogPost({
       title,
       slug,
@@ -32,7 +54,11 @@ exports.addBlog = async (req, res) => {
       tags: tags?.split(",").map((tag) => tag.trim()),
       coverImage,
       schemaMarkup: schemaArray,
+      faqs,
+      faqSchema,
     });
+
+    //console.log(blogPost);
 
     await blogPost.save();
 
@@ -80,7 +106,7 @@ exports.updateBlog = async (req, res) => {
     const updatedBlog = await BlogPost.findOneAndUpdate(
       { slug },
       updateFields,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedBlog) {
@@ -132,7 +158,7 @@ exports.updateCoverImage = async (req, res) => {
         coverImage: imageUrl,
         lastUpdated: new Date(),
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedBlog) {
