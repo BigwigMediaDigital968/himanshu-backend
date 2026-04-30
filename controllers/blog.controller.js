@@ -88,6 +88,28 @@ exports.updateBlog = async (req, res) => {
   try {
     const { slug } = req.params;
     const { title, content, author, excerpt, tags, schemaMarkup } = req.body;
+    const faqs = JSON.parse(req.body.faqs || "[]");
+
+    let faqSchema = "";
+
+    if (faqs && faqs.length > 0) {
+      const schema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs
+          .filter((faq) => faq.question && faq.answer)
+          .map((faq) => ({
+            "@type": "Question",
+            name: faq.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: faq.answer,
+            },
+          })),
+      };
+
+      faqSchema = JSON.stringify(schema);
+    }
 
     const updateFields = {
       ...(title && { title }),
@@ -96,6 +118,8 @@ exports.updateBlog = async (req, res) => {
       ...(excerpt && { excerpt }),
       ...(tags && { tags: tags.split(",").map((t) => t.trim()) }),
       ...(schemaMarkup && { schemaMarkup }),
+      ...(faqSchema && { faqSchema }),
+      faqs,
       lastUpdated: new Date(),
     };
 
