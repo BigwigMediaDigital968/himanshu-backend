@@ -87,7 +87,7 @@ exports.getAllBlogs = async (req, res) => {
 exports.updateBlog = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { title, content, author, excerpt, tags, schemaMarkup } = req.body;
+    const { title, content, author, excerpt, tags, schemaMarkup, slug: newSlug } = req.body;
     const faqs = JSON.parse(req.body.faqs || "[]");
 
     let faqSchema = "";
@@ -119,7 +119,8 @@ exports.updateBlog = async (req, res) => {
       ...(tags && { tags: tags.split(",").map((t) => t.trim()) }),
       ...(schemaMarkup && { schemaMarkup }),
       ...(faqSchema && { faqSchema }),
-      faqs,
+      ...(newSlug && { slug: newSlug }),
+      ...(faqs && { faqs }),
       lastUpdated: new Date(),
     };
 
