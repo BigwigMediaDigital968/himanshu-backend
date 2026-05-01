@@ -88,7 +88,7 @@ exports.updateBlog = async (req, res) => {
   try {
     const { slug } = req.params;
     const { title, content, author, excerpt, tags, schemaMarkup, slug: newSlug } = req.body;
-    const faqs = JSON.parse(req.body.faqs || "[]");
+    const faqs = req.body.faqs ? JSON.parse(req.body.faqs) : null;
 
     let faqSchema = "";
 
@@ -120,7 +120,7 @@ exports.updateBlog = async (req, res) => {
       ...(schemaMarkup && { schemaMarkup }),
       ...(faqSchema && { faqSchema }),
       ...(newSlug && { slug: newSlug }),
-      ...(faqs && { faqs }),
+        ...(faqs !== null && faqs.length > 0 && { faqs }),  // ✅ only update if actually provided
       lastUpdated: new Date(),
     };
 
