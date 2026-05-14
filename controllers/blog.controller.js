@@ -120,7 +120,7 @@ exports.updateBlog = async (req, res) => {
       ...(schemaMarkup && { schemaMarkup }),
       ...(faqSchema && { faqSchema }),
       ...(newSlug && { slug: newSlug }),
-        ...(faqs !== null && faqs.length > 0 && { faqs }),  // ✅ only update if actually provided
+      ...(faqs !== null && faqs.length > 0 && { faqs }),  // ✅ only update if actually provided
       lastUpdated: new Date(),
     };
 
@@ -197,6 +197,29 @@ exports.updateCoverImage = async (req, res) => {
   } catch (error) {
     console.error("Update image error:", error);
     res.status(500).json({ message: "Error updating cover image" });
+  }
+};
+
+/* ================= UPLOAD EDITOR IMAGE ================= */
+exports.uploadEditorImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file uploaded" });
+    }
+
+    const imageUrl = req.file.secure_url || req.file.path;
+    const publicId = req.file.filename || req.file.public_id || null;
+
+    res.status(201).json({
+      message: "Editor image uploaded successfully",
+      image: {
+        url: imageUrl,
+        publicId,
+      }
+    });
+  } catch (error) {
+    console.error("Upload editor image error:", error);
+    res.status(500).json({ message: "Error uploading editor image" });
   }
 };
 
