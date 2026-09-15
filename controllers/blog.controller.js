@@ -128,9 +128,16 @@ exports.updateBlog = async (req, res) => {
       updateFields.coverImage = req.file.secure_url || req.file.path;
     }
 
+    const updateOps = { $set: updateFields };
+
+    // Slug changed: remember the old slug so old links can auto-redirect
+    if (newSlug && newSlug !== slug) {
+      updateOps.$addToSet = { slugHistory: slug };
+    }
+
     const updatedBlog = await BlogPost.findOneAndUpdate(
       { slug },
-      updateFields,
+      updateOps,
       { new: true, runValidators: true },
     );
 
@@ -220,6 +227,29 @@ exports.uploadEditorImage = async (req, res) => {
   } catch (error) {
     console.error("Upload editor image error:", error);
     res.status(500).json({ message: "Error uploading editor image" });
+  }
+};
+
+/* ================= GET BLOG BY SLUG ================= */
+exports.getBlogBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const blog = await BlogPost.findOne({ slug });
+    if (blog) {
+      return res.status(200).json({ redirected: false, blog });
+    }
+
+    // Not live under this slug — check if it's an old slug of a renamed post.
+    const renamedBlog = await BlogPost.findOne({ slugHistory: slug }).select("slug");
+    if (renamedBlog) {
+      return res.status(200).json({ redirected: true, slug: renamedBlog.slug });
+    }
+
+    return res.status(404).json({ msg: "Blog post not found" });
+  } catch (error) {
+    console.error("Get blog by slug error:", error);
+    res.status(500).json({ msg: "Server Error" });
   }
 };
 

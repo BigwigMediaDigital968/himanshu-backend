@@ -10,6 +10,10 @@ const blogPostSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  slugHistory: {
+    type: [String],
+    default: [],
+  },
   excerpt: {
     type: String,
     required: true,

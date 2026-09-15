@@ -43,4 +43,7 @@ router.post(
 
 router.get("/related/:slug", blogController.getRelatedBlogs);
 
+// Must stay last among GET routes — ":slug" would otherwise shadow the routes above.
+router.get("/:slug", blogController.getBlogBySlug);
+
 module.exports = router;
