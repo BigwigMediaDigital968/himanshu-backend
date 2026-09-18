@@ -208,7 +208,7 @@ router.post(
       });
 
       // 📩 Admin notification email
-      const emailres = await sendEmail({
+      await sendEmail({
         to: process.env.ADMIN_EMAIL,
         subject: "📩 New Appointment Received",
         html: `
@@ -221,7 +221,6 @@ router.post(
         `,
       });
 
-      console.log(emailres);
 
       // ✅ Final response
       res.status(201).json({
