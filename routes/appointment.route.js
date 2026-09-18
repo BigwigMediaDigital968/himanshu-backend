@@ -5,7 +5,6 @@ const Appointment = require("../models/appointment.model");
 const sendEmail = require("../utils/sendEmail");
 
 const {
-  createAppointment,
   getAllAppointments,
   updateAppointmentStatus,
   deleteAppointment,
@@ -15,16 +14,6 @@ const storage = require("../config/storage");
 
 // Multer instance
 const upload = multer({ storage });
-
-// 👇 allow either images[] OR report (pdf)
-router.post(
-  "/",
-  upload.fields([
-    { name: "images", maxCount: 5 }, // multiple images
-    { name: "report", maxCount: 1 }, // single pdf
-  ]),
-  createAppointment,
-);
 
 const otpMap = new Map();
 
@@ -219,7 +208,7 @@ router.post(
       });
 
       // 📩 Admin notification email
-      await sendEmail({
+      const emailres = await sendEmail({
         to: process.env.ADMIN_EMAIL,
         subject: "📩 New Appointment Received",
         html: `
@@ -231,6 +220,8 @@ router.post(
           <p><strong>Message:</strong> ${message || "-"}</p>
         `,
       });
+
+      console.log(emailres);
 
       // ✅ Final response
       res.status(201).json({
