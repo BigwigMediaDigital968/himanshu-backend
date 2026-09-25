@@ -209,7 +209,7 @@ router.post(
 
       // 📩 Admin notification email
       await sendEmail({
-        to: process.env.ADMIN_EMAIL,
+        to: "varenyamvascular@gmail.com",
         subject: "📩 New Appointment Received",
         html: `
           <h3>New Appointment Details</h3>
